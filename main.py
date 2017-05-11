@@ -1,6 +1,7 @@
 import socket  #required
 import os
 import json
+import tweepy
 
 def httpGet(url):
     _, _, host, path = url.split('/', 3)
@@ -35,19 +36,37 @@ def parse():
     jsonfile.write(parsedata)  #writes to a json file
     jsonfile.close()
     
-temp = open('temp.txt', 'wb')  #writes socket info to file
-httpGet('http://localhost/example.json')  #url data here
-temp.close()
-parse()
+def get_api(cfg):
+    auth = tweepy.OAuthHandler(cfg['consumer_key'], cfg['consumer_secret'])
+    auth.set_access_token(cfg['access_token'], cfg['access_token_secret'])
+    return tweepy.API(auth)
+    
+def main():
+    #fill in the info with correct values
+    cfg = {
+        "consumer_key":"VALUE", 
+        "consumer_secret":"VALUE", 
+        "access_token":"VALUE", 
+        "access_token_secret":"VALUE"
+        }
+    
+    api = get_api(cfg)
+    tweet = "Hello World"
+    api.update_status(tweet)
+    
+while True:  #runs the bot constantly
+    temp = open('temp.txt', 'wb')  #writes socket info to file
+    httpGet('http://192.168.10.40/data.json')  #url data here
+    temp.close()
+    parse()
 
-jsonfile = open('data.json', 'r')
-data = json.load(jsonfile)
-temp = data["sensordatavalues"][0]  #gets the temp values from the json
-hum = data["sensordatavalues"][1]  #gets humidity from the file
+    jsonfile = open('data.json', 'r')
+    data = json.load(jsonfile)
+    temp = data["sensordatavalues"][0]  #gets the temp values from the json
+    hum = data["sensordatavalues"][1]  #gets humidity from the file
 
-print(temp['value'])  #prints the temp value
-print(hum['value'])  #prints humidity value
-
-
+    temp = "Temperature  = " + temp['value']  #prints the temp value
+    hum = "Humidity = " + hum['value']  #prints humidity value  
+    main()
 
 
